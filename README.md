@@ -75,18 +75,9 @@ Risk assessment is crucial for quantifying driving environment risks and reducin
 
 ### Quick Start
 
-1. Initialize the model:
+1. Run the `quick_run.py` file:
     ```python
-    from risk_assessment_model import RiskAssessmentModel
-
-    model = RiskAssessmentModel(dataset='inD')
-    ```
-
-2. Load a scenario and evaluate risk:
-    ```python
-    scenario = model.load_scenario('on_ramp_merging')
-    risk_value = model.evaluate_risk(scenario)
-    print(f"Risk value for on-ramp merging scenario: {risk_value}")
+    python quick_run.py
     ```
 
 ## Datasets
