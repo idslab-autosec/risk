@@ -51,6 +51,14 @@ Risk assessment is crucial for quantifying driving environment risks and reducin
     ```bash
     pip install -r requirements.txt
     ```
+    
+    OR 
+    
+    manual install packages: numpy,scipy,pandas,matplotlib and opencv-python
+    ```bash
+    pip install numpy scipy pandas matplotlib opencv-python
+    
+    ```
 3. Prepare the datasets:
     - Download the required datasets from the following sources:
         - [inD Dataset](https://www.ind-dataset.com/)
