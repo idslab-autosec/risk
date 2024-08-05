@@ -1,13 +1,10 @@
-# Comprehensive Risk Assessment Model for Autonomous Driving
+# SOTIF-Oriented Risk Assessment: A Multi-Dimensional Model for Autonomous Driving
 
-## Authors
-- [Author 1](https://github.com/author1)
-- [Author 2](https://github.com/author2)
-- [Author 3](https://github.com/author3)
 
 ## Abstract
-Risk assessment is crucial for quantifying driving environment risks and reducing the Safety of the Intended Functionality (SOTIF) uncertainty in autonomous driving systems. However, existing methods often focus on single-type scenarios and fail to address complex interactions involving various traffic participants and directions. Consequently, we propose a risk assessment model capable of evaluating risks across diverse traffic participants, multiple directions, and complex multi-risk scenarios. Our model integrates state information from both the ego vehicle and surrounding traffic participants to compute a comprehensive risk probability distribution and environmental impact model. By iteratively calculating the cumulative environment cost for each traffic participant and deriving a scalar risk value through sampling and summation within a map grid, our approach ensures more accurate risk quantification. We validated our model using extensive real-world datasets, including inD, highD, and rounD, to demonstrate its practical applicability. Through comparative analysis with single-scenario metrics, we confirmed the correctness of our method. Additionally, testing across various scenario types and comparing with existing single-scenario metrics highlighted the model's generalization capability. The results showed that our model accurately quantifies environmental risks, making it a robust tool for the development and deployment of safer autonomous driving systems.
+Risk assessment is crucial for quantifying driving environment risks and reducing the Safety of the Intended Functionality (SOTIF) uncertainty in Autonomous Vehicles (AVs). Traditional methods, however, often concentrate on single-scenario metrics and are insufficient in capturing the complexities of multi-participant and multi-directional interactions. This paper introduces a risk assessment model capable of evaluating risks across diverse traffic participants, multiple directions, and complex multi-risk scenarios. Our model leverages state information from both the ego vehicle and surrounding traffic to compute a comprehensive risk probability distribution and environmental impact assessment. It achieves more precise risk quantification through an iterative process that calculates cumulative environmental costs and derives scalar risk values via sampling and summation within a map grid. Rigorously validated using extensive real-world datasets (inD, highD, rounD), our model demonstrates superior accuracy and scalability in diverse driving scenarios, as confirmed by comparative analysis with traditional metrics. Additionally, testing across various scenario types and comparing with existing single-scenario metrics highlighted the model's generalization capability. The results showed that our model not only accurately quantifies environmental risks but also significantly enhances the safety and reliability of AVs, especially in high-risk, long-tail cases, making it a robust tool for the development and deployment of safer autonomous driving systems.
 
+This paper is currently being submitted to IEEE Robotics and Automation Letters (RA-L).
 ## Framework Overview
 
 ![Framework](figure/framework.png)
@@ -104,6 +101,3 @@ We welcome contributions to enhance this project. Please fork the repository and
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
-
-For questions or further information, please contact [Author 1](mailto:author1@example.com), [Author 2](mailto:author2@example.com), or [Author 3](mailto:author3@example.com).
