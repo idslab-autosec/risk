@@ -4,7 +4,7 @@
 ## Abstract
 Risk assessment is crucial for quantifying driving environment risks and reducing the Safety of the Intended Functionality (SOTIF) uncertainty in Autonomous Vehicles (AVs). Traditional methods, however, often concentrate on single-scenario metrics and are insufficient in capturing the complexities of multi-participant and multi-directional interactions. This paper introduces a risk assessment model capable of evaluating risks across diverse traffic participants, multiple directions, and complex multi-risk scenarios. Our model leverages state information from both the ego vehicle and surrounding traffic to compute a comprehensive risk probability distribution and environmental impact assessment. It achieves more precise risk quantification through an iterative process that calculates cumulative environmental costs and derives scalar risk values via sampling and summation within a map grid. Rigorously validated using extensive real-world datasets (inD, highD, rounD), our model demonstrates superior accuracy and scalability in diverse driving scenarios, as confirmed by comparative analysis with traditional metrics. Additionally, testing across various scenario types and comparing with existing single-scenario metrics highlighted the model's generalization capability. The results showed that our model not only accurately quantifies environmental risks but also significantly enhances the safety and reliability of AVs, especially in high-risk, long-tail cases, making it a robust tool for the development and deployment of safer autonomous driving systems.
 
-This paper is currently being submitted to IEEE Robotics and Automation Letters (RA-L).
+This paper has been accepted by IEEE Robotics and Automation Letters (RA-L).
 ## Framework Overview
 
 ![Framework](figure/framework.png)
@@ -101,3 +101,18 @@ We welcome contributions to enhance this project. Please fork the repository and
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Citation
+
+If you find this work useful in your research, please consider citing our paper:
+
+```bibtex
+@ARTICLE{10803078,
+  author={Yao, Botao and Huang, Shuohan and Han, Peiyi and Lin, Jie and Duan, Shaoming and Liu, Chuanyi},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={SOTIF-Oriented Risk Assessment: A Multi-Dimensional Model for Autonomous Driving}, 
+  year={2025},
+  volume={10},
+  number={2},
+  pages={1792-1799},
+  keywords={Risk management;Computational modeling;Measurement;Autonomous vehicles;Safety;Adaptation models;Vehicle dynamics;Uncertainty;Collision avoidance;Accuracy;Multi-robot systems;path planning for multiple mobile robots or agents;collision avoidance;planning under uncertainty},
+  doi={10.1109/LRA.2024.3518297}}
