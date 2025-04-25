@@ -1,8 +1,10 @@
 
 import numpy as np
 from scipy.interpolate import griddata
+from matplotlib.path import Path  
 
-def Gaussian_3d_torus_a(arc_len, par1, dla):
+
+def gs_a(arc_len, par1, dla):
     """
     Calculates the parameter 'a' for the Gaussian 3D torus.
 
@@ -16,17 +18,17 @@ def Gaussian_3d_torus_a(arc_len, par1, dla):
     """
     par2 = dla
     a_par = par1 * (arc_len - par2) ** 2
-    # if arc_len > dla --> 0
+    # If arc_len > dla --> 0
     a_par_sign1 = (np.sign(dla - arc_len) + 1) / 2
-    # if value is negative
+    # If value is negative
     a_par_sign2 = (np.sign(a_par) + 1) / 2
-    # if arc_len is negative
+    # If arc_len is negative
     a_par_sign3 = (np.sign(arc_len) + 1) / 2
-    # final a
+    # Final a
     a = a_par_sign1 * a_par_sign2 * a_par_sign3 * a_par
     return a
 
-def Gaussian_3d_torus_arclen(x, y, xv, yv, delta, xc, yc, R):
+def gs_arclen(x, y, xv, yv, delta, xc, yc, R):
     """
     Calculates the arc length for the Gaussian 3D torus.
 
@@ -44,7 +46,7 @@ def Gaussian_3d_torus_arclen(x, y, xv, yv, delta, xc, yc, R):
     mag_v = np.abs(np.sqrt((x - xc) ** 2 + (y - yc) ** 2))
     dot_pro = (xv - xc) * (x - xc) + (yv - yc) * (y - yc)
     costheta = dot_pro / (mag_u * mag_v)
-    # 确保 costheta 在 [-1, 1] 范围内
+    # Ensure costheta is within [-1, 1] range
     costheta_clipped = np.clip(costheta, -1, 1)
     theta_abs = np.arccos(costheta_clipped)  # will always be positive
     sign_theta = np.sign((xv - xc) * (y - yc) - (x - xc) * (yv - yc))
@@ -54,7 +56,7 @@ def Gaussian_3d_torus_arclen(x, y, xv, yv, delta, xc, yc, R):
     return arc_len
 
 
-def Gaussian_3d_torus_delta(delta_a):
+def gs_delta(delta_a):
     """
     Processes the delta value for the Gaussian 3D torus.
 
@@ -70,7 +72,7 @@ def Gaussian_3d_torus_delta(delta_a):
         delta = delta_a
     return delta
 
-def Gaussian_3d_torus_dla(tla, V):
+def gs_dla(tla, V):
     """
     Processes the dla value for the Gaussian 3D torus.
 
@@ -85,7 +87,7 @@ def Gaussian_3d_torus_dla(tla, V):
     if dla < 1:
         dla = 1
     return dla
-def Gaussian_3d_torus_mexp(kexp, mcexp, delta, v=0, delta1=0, dt=0):
+def gs_mexp(kexp, mcexp, delta, v=0, delta1=0, dt=0):
     """
     Calculates the mexp value for the Gaussian 3D torus.
 
@@ -103,7 +105,7 @@ def Gaussian_3d_torus_mexp(kexp, mcexp, delta, v=0, delta1=0, dt=0):
     mexp = mcexp + kexp * abs(delta)
     return mexp
 
-def Gaussian_3d_torus_phiv(phiv_a):
+def gs_phiv(phiv_a):
     """
     Calculates the phiv value for the Gaussian 3D torus.
 
@@ -117,7 +119,7 @@ def Gaussian_3d_torus_phiv(phiv_a):
     phiv = np.abs(np.remainder(2 * np.pi * pi2temp + phiv_a, 2 * np.pi))  # phiv in terms of 0->2*pi radians
     return phiv
 
-def Gaussian_3d_torus_R(L, delta):
+def gs_R(L, delta):
     """
     Calculates the turning radius for the Gaussian 3D torus.
 
@@ -131,7 +133,7 @@ def Gaussian_3d_torus_R(L, delta):
     R = np.abs(L / np.tan(delta))
     return R
 
-def Gaussian_3d_torus_sigma(arc_len, prb1, prb2):
+def gs_sigma(arc_len, prb1, prb2):
     """
     Calculates the sigma value for the Gaussian 3D torus.
 
@@ -146,7 +148,7 @@ def Gaussian_3d_torus_sigma(arc_len, prb1, prb2):
     sigma = prb1 * arc_len + prb2
     return sigma
 
-def Gaussian_3d_torus_xcyc(xv, yv, phiv, delta, R):
+def gs_center(xv, yv, phiv, delta, R):
     """
     Calculates the center coordinates for the Gaussian 3D torus.
 
@@ -167,7 +169,7 @@ def Gaussian_3d_torus_xcyc(xv, yv, phiv, delta, R):
     yc = R * np.sin(phil) + yv
     return xc, yc
 
-def Gaussian_3d_torus_z(x, y, xc, yc, R, a, sigma1, sigma2):
+def gs_z(x, y, xc, yc, R, a, sigma1, sigma2):
     """
     Calculates the z value for the Gaussian 3D torus.
 
@@ -197,7 +199,7 @@ def Gaussian_3d_torus_z(x, y, xc, yc, R, a, sigma1, sigma2):
     return zpure
 
 
-def Gaussian_3d_torus_meshgrid(xv, yv, dla, res, Car_Nrp_Idx):
+def gs_grid(xv, yv, dla, res, Car_Nrp_Idx):
     """
     Generates a meshgrid for the Gaussian 3D torus.
 
@@ -233,7 +235,7 @@ def field_distribution(x=0, y=0, speed=10, heading_angle=0, turning_angle=0.1, v
     L = vehicle_length
     phiv = heading_angle
 
-    # 按需进行参数配置
+    # Configure parameters as needed
     Sr = 54
     res = 1  # meshgrid resolution
     tla = 2.75
@@ -243,23 +245,23 @@ def field_distribution(x=0, y=0, speed=10, heading_angle=0, turning_angle=0.1, v
     mcexp = 0.26
     cexp = 2.55
 
-    # 计算高斯函数
+    # Calculate Gaussian function
     delta_fut_h = (np.pi / 180) * turning_angle / Sr
     phiv_a = (np.pi / 180) * phiv
 
-    delta = Gaussian_3d_torus_delta(delta_fut_h)
-    phiv = Gaussian_3d_torus_phiv(phiv_a)
-    dla = Gaussian_3d_torus_dla(tla, v)
-    R = Gaussian_3d_torus_R(L, delta)
-    xc, yc = Gaussian_3d_torus_xcyc(xv, yv, phiv, delta, R)
-    X, Y, xbl, xbu, ybl, ybu = Gaussian_3d_torus_meshgrid(xv, yv, dla, res, None)
-    mexp1 = Gaussian_3d_torus_mexp(kexp1, mcexp, delta, v, None, None)
-    mexp2 = Gaussian_3d_torus_mexp(kexp2, mcexp, delta, v, None, None)
-    arc_len = Gaussian_3d_torus_arclen(X, Y, xv, yv, delta, xc, yc, R)
-    a = Gaussian_3d_torus_a(arc_len, par1, dla)
-    sigma1 = Gaussian_3d_torus_sigma(arc_len, mexp1, cexp)
-    sigma2 = Gaussian_3d_torus_sigma(arc_len, mexp2, cexp)
-    Z_cur = Gaussian_3d_torus_z(X, Y, xc, yc, R, a, sigma1, sigma2)
+    delta = gs_delta(delta_fut_h)
+    phiv = gs_phiv(phiv_a)
+    dla = gs_dla(tla, v)
+    R = gs_R(L, delta)
+    xc, yc = gs_center(xv, yv, phiv, delta, R)
+    X, Y, xbl, xbu, ybl, ybu = gs_grid(xv, yv, dla, res, None)
+    mexp1 = gs_mexp(kexp1, mcexp, delta, v, None, None)
+    mexp2 = gs_mexp(kexp2, mcexp, delta, v, None, None)
+    arc_len = gs_arclen(X, Y, xv, yv, delta, xc, yc, R)
+    a = gs_a(arc_len, par1, dla)
+    sigma1 = gs_sigma(arc_len, mexp1, cexp)
+    sigma2 = gs_sigma(arc_len, mexp2, cexp)
+    Z_cur = gs_z(X, Y, xc, yc, R, a, sigma1, sigma2)
     qpr = np.sum(Z_cur)
     if common_grid is not None:
         X_common, Y_common = common_grid
@@ -273,3 +275,89 @@ def field_distribution(x=0, y=0, speed=10, heading_angle=0, turning_angle=0.1, v
 def create_common_grid(x_min, x_max, y_min, y_max, resolution=0.5):
     X_common, Y_common = np.meshgrid(np.arange(x_min, x_max, resolution), np.arange(y_min, y_max, resolution))
     return X_common, Y_common
+
+
+def get_rotated_rectangle_corners(x, y, width, height, angle):
+    """
+    Used for ind dataset, not used for highD
+    Calculate the four corner points of a rotated rectangle
+    :param x: Center point x coordinate
+    :param y: Center point y coordinate
+    :param width: Rectangle width
+    :param height: Rectangle height
+    :param angle: Rotation angle
+    :return: Coordinates of four corner points
+    """
+    angle_rad = np.radians(angle)
+    dx = width / 2
+    dy = height / 2
+
+    corners = np.array([
+        [-dx, -dy],
+        [dx, -dy],
+        [dx, dy],
+        [-dx, dy]
+    ])
+
+    rotation_matrix = np.array([
+        [np.cos(angle_rad), -np.sin(angle_rad)],
+        [np.sin(angle_rad), np.cos(angle_rad)]
+    ])
+
+    rotated_corners = rotation_matrix @ corners.T
+    rotated_corners[0, :] += x
+    rotated_corners[1, :] += y
+
+    return rotated_corners.T
+
+def generate_scene_cost(grid_x, grid_y, all_vehicle_data, ego_id):
+    """
+    Generate scene cost map considering all vehicles (except ego vehicle) positions and motion states
+    
+    Args:
+        grid_x, grid_y (numpy.ndarray): Grid point coordinates
+        all_vehicle_data (list): List of all vehicle data
+        ego_id: Ego vehicle ID
+        
+    Returns:
+        numpy.ndarray: Scene cost map
+    """
+    grid_map = np.zeros_like(grid_x)
+    grid_points = np.column_stack((grid_x.ravel(), grid_y.ravel()))
+    
+    m = 1.5
+    car_weghit_cost = 10
+    pedestrian_weight_cost = 100  # pedestrian weight cost
+    
+    # ego info
+    for i in range(len(all_vehicle_data)):
+        vehicle = all_vehicle_data[i]
+        id = vehicle[0]
+        if id == ego_id:
+            ego_vx, ego_vy = vehicle[3], vehicle[4]
+
+    # vehicle info
+    for i in range(len(all_vehicle_data)):
+        vehicle = all_vehicle_data[i]
+        id = vehicle[0]
+        x, y = vehicle[1], vehicle[2]
+        vx, vy = vehicle[3], vehicle[4]
+        length, width = vehicle[5], vehicle[6]
+        heading = vehicle[7]
+        
+        # ego cost not considered
+        if id == ego_id:
+            continue
+
+        # corner points
+        corners = get_rotated_rectangle_corners(x, y, width, length, heading+90)
+        path = Path(corners)
+        inside = path.contains_points(grid_points)
+
+        # cost model
+        cost = m * 0.5 * ((vx - ego_vx) ** 2 + (vy - ego_vy) ** 2) * car_weghit_cost
+
+        # region cost
+        grid_map.ravel()[inside] = cost
+
+    return grid_map

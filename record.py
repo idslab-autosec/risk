@@ -3,8 +3,8 @@ import risk
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage import gaussian_filter
 import cv2
+from Constant import RiskConstants
 
 class Record:
     def __init__(self, iRecord):
@@ -111,41 +111,46 @@ class Record:
         grid_y = np.arange(0, 101, res)
         X, Y = np.meshgrid(grid_x, grid_y)
 
-        Sr = 54
-        L = 5
-        par1 = 0.4
-        mcexp = 0.3
-        cexp = 2.55
-        kexp1 = 2
-        kexp2 = 2
-        car_cost = 10
-        tla = 2.75
-        steering_angle = 0.001
-        delta_fut_h = (np.pi / 180) * steering_angle / Sr
+        delta_fut_h = (np.pi / 180) * RiskConstants.STEERING_ANGLE / RiskConstants.SR
         phiv_a = (np.pi / 180) * ego_heading
 
-        delta = risk.Gaussian_3d_torus_delta(delta_fut_h)
-        phiv = risk.Gaussian_3d_torus_phiv(phiv_a)
-        dla = risk.Gaussian_3d_torus_dla(tla, ego_speed)
-        R = risk.Gaussian_3d_torus_R(L, delta)
-        xc, yc = risk.Gaussian_3d_torus_xcyc(ego_x, ego_y, phiv, delta, R)
-        mexp1 = risk.Gaussian_3d_torus_mexp(kexp1, mcexp, delta, ego_speed)
-        mexp2 = risk.Gaussian_3d_torus_mexp(kexp2, mcexp, delta, ego_speed)
-        arc_len = risk.Gaussian_3d_torus_arclen(X, Y, ego_x, ego_y, delta, xc, yc, R)
-        a = risk.Gaussian_3d_torus_a(arc_len, par1, dla)
-        sigma1 = risk.Gaussian_3d_torus_sigma(arc_len, mexp1, cexp)
-        sigma2 = risk.Gaussian_3d_torus_sigma(arc_len, mexp2, cexp)
-        Z_cur = risk.Gaussian_3d_torus_z(X, Y, xc, yc, R, a, sigma1, sigma2)
+        delta = risk.gs_delta(delta_fut_h)
+        phiv = risk.gs_phiv(phiv_a)
+        dla = risk.gs_dla(RiskConstants.TLA, ego_speed)
+        R = risk.gs_R(RiskConstants.L, delta)
+        xc, yc = risk.gs_center(ego_x, ego_y, phiv, delta, R)
+        mexp1 = risk.gs_mexp(RiskConstants.KEXP1, RiskConstants.MCEXP, delta, ego_speed)
+        mexp2 = risk.gs_mexp(RiskConstants.KEXP2, RiskConstants.MCEXP, delta, ego_speed)
+        arc_len = risk.gs_arclen(X, Y, ego_x, ego_y, delta, xc, yc, R)
+        a = risk.gs_a(arc_len, RiskConstants.PAR1, dla)
+        sigma1 = risk.gs_sigma(arc_len, mexp1, RiskConstants.CEXP)
+        sigma2 = risk.gs_sigma(arc_len, mexp2, RiskConstants.CEXP)
+        z_prob = risk.gs_z(X, Y, xc, yc, R, a, sigma1, sigma2)
 
         all_vehicles_data = self.get_all_frame_vehicle(frame_id)
+        scene_cost = risk.generate_scene_cost(X, Y, all_vehicles_data, ego_id)  # 修改为调用risk.py中的方法
+        risk_qrf = np.sum(z_prob)
+        
+        # return risk_qrf
+        # 计算量化感知风险
+        z = np.dot(z_prob.flatten(), scene_cost.flatten())
+        
+        print("risk:{},ego_qrf:{}".format(z, risk_qrf))
 
-        qrf = np.sum(Z_cur)
-        return qrf
+        return risk
 
     def draw_frame_risk(self, frame_id):
         """
         Draw the risk map for a specific frame and save as a PNG file.
         """
+        # Constants for drawing
+        res = 0.2  # Grid resolution
+        grid_x_start, grid_x_end = 0, 1001  # X-axis grid range from 0 to 1000
+        grid_y_start, grid_y_end = 0, 101   # Y-axis grid range from 0 to 100
+        fig_size = (16, 12)  # Figure size
+        dpi = 300  # Image resolution
+        ratio = 0.10106 * 4  # Scaling ratio
+
         all_vehicles_data = self.get_all_frame_vehicle(frame_id)
         if all_vehicles_data.size == 0:
             raise ValueError('No vehicles exist in the current frame')
@@ -153,44 +158,29 @@ class Record:
         img = plt.imread(self.bg_path)
         img_height, img_width = img.shape[:2]
 
-        res = 0.2
-        grid_x = np.arange(0, 1001, res)
-        grid_y = np.arange(0, 101, res)
+        grid_x = np.arange(grid_x_start, grid_x_end, res)
+        grid_y = np.arange(grid_y_start, grid_y_end, res)
         X, Y = np.meshgrid(grid_x, grid_y)
         frame_risk = np.zeros_like(X)
-
-        Sr = 54
-        L = 5
-        par1 = 0.4
-        mcexp = 0.3
-        cexp = 2.55
-        kexp1 = 2
-        kexp2 = 2
-        car_cost = 10
-        tla = 2.75
-        steering_angle = 0.001
-        ego_heading = 0.01
-        delta_fut_h = (np.pi / 180) * steering_angle / Sr
-        phiv_a = (np.pi / 180) * ego_heading
 
         for vehicle_data in all_vehicles_data:
             vehicle_id, x, y, vx, vy, length, width, heading = vehicle_data
             speed = np.sqrt(vx ** 2 + vy ** 2)
-            delta_fut_h = (np.pi / 180) * steering_angle / Sr
+            delta_fut_h = (np.pi / 180) * RiskConstants.STEERING_ANGLE / RiskConstants.SR
             phiv_a = (np.pi / 180) * heading
 
-            delta = risk.Gaussian_3d_torus_delta(delta_fut_h)
-            phiv = risk.Gaussian_3d_torus_phiv(phiv_a)
-            dla = risk.Gaussian_3d_torus_dla(tla, speed)
-            R = risk.Gaussian_3d_torus_R(L, delta)
-            xc, yc = risk.Gaussian_3d_torus_xcyc(x, y, phiv, delta, R)
-            mexp1 = risk.Gaussian_3d_torus_mexp(kexp1, mcexp, delta, speed)
-            mexp2 = risk.Gaussian_3d_torus_mexp(kexp2, mcexp, delta, speed)
-            arc_len = risk.Gaussian_3d_torus_arclen(X, Y, x, y, delta, xc, yc, R)
-            a = risk.Gaussian_3d_torus_a(arc_len, par1, dla)
-            sigma1 = risk.Gaussian_3d_torus_sigma(arc_len, mexp1, cexp)
-            sigma2 = risk.Gaussian_3d_torus_sigma(arc_len, mexp2, cexp)
-            Z_cur = risk.Gaussian_3d_torus_z(X, Y, xc, yc, R, a, sigma1, sigma2)
+            delta = risk.gs_delta(delta_fut_h)
+            phiv = risk.gs_phiv(phiv_a)
+            dla = risk.gs_dla(RiskConstants.TLA, speed)
+            R = risk.gs_R(RiskConstants.L, delta)
+            xc, yc = risk.gs_center(x, y, phiv, delta, R)
+            mexp1 = risk.gs_mexp(RiskConstants.KEXP1, RiskConstants.MCEXP, delta, speed)
+            mexp2 = risk.gs_mexp(RiskConstants.KEXP2, RiskConstants.MCEXP, delta, speed)
+            arc_len = risk.gs_arclen(X, Y, x, y, delta, xc, yc, R)
+            a = risk.gs_a(arc_len, RiskConstants.PAR1, dla)
+            sigma1 = risk.gs_sigma(arc_len, mexp1, RiskConstants.CEXP)
+            sigma2 = risk.gs_sigma(arc_len, mexp2, RiskConstants.CEXP)
+            Z_cur = risk.gs_z(X, Y, xc, yc, R, a, sigma1, sigma2)
 
             frame_risk += Z_cur
 
@@ -199,12 +189,10 @@ class Record:
         fig, ax = plt.subplots(figsize=fig_size, dpi=dpi)
         ax.imshow(img, extent=[0, img_width, img_height, 0])
 
-        ratio = 0.10106 * 4
         grid_x_scaled = grid_x / ratio
         grid_y_scaled = grid_y / ratio
 
         plt.contourf(grid_x_scaled, grid_y_scaled, frame_risk, levels=200, cmap='jet', alpha=0.7)
-
         plt.scatter(all_vehicles_data[:, 1] / ratio, all_vehicles_data[:, 2] / ratio, c='white', s=20)
         plt.axis('off')
         plt.xlim(0, img_width)
@@ -230,7 +218,9 @@ def diff_n(x, n):
     return x[n:] - x[:-n]
 
 def main():
-    Record(1).draw_frame_risk(1)  # Test one frame
-
+    # Record(1).draw_frame_risk(1)  # Test one frame
+    
+    Record(1).calculate_risk(2,1)
+    
 if __name__ == "__main__":
     main()
